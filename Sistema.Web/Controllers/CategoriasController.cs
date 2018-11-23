@@ -1,15 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Sistema.Datos;
-using Sistema.Entidades.Almacen;
-
-namespace Sistema.Web.Controllers
+﻿namespace Sistema.Web.Controllers
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore;
+    using Sistema.Datos;
+    using Sistema.Entidades.Almacen;
+    using Sistema.Web.Models.Almacen.Categorias;
+
     [Route("api/[controller]")]
     [ApiController]
     public class CategoriasController : ControllerBase
@@ -21,30 +22,42 @@ namespace Sistema.Web.Controllers
             _context = context;
         }
 
-        // GET: api/Categorias
-        [HttpGet]
-        public IEnumerable<Categoria> GetCategorias()
+        // GET: api/Categorias/listar
+        [HttpGet("[action]")]
+        public async  Task<IEnumerable<CategoriaViewModel>> Listar()
         {
-            return _context.Categorias;
+            var categoria = await _context.Categorias.ToListAsync();
+
+            return categoria.Select(c => new CategoriaViewModel()
+            {
+                condicion =  c.Condicion,
+                descripcion = c.Descripcion,
+                idcategoria = c.CategoriaId,
+                nombre = c.Nombre,
+
+            });
         }
 
-        // GET: api/Categorias/5
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetCategoria([FromRoute] int id)
+        // GET: api/Categorias/MOstrar/5
+        [HttpGet("[action]/{id}")]
+        public async Task<IActionResult> Mostrar([FromRoute] int id)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
+           
             var categoria = await _context.Categorias.FindAsync(id);
 
             if (categoria == null)
             {
-                return NotFound();
+                return NotFound("El registro buscado no Existe.");
             }
 
-            return Ok(categoria);
+            return Ok(new CategoriaViewModel()
+            {
+                descripcion = categoria.Descripcion,
+                idcategoria = categoria.CategoriaId,
+                nombre = categoria.Nombre,
+                condicion = categoria.Condicion,
+
+            });
         }
 
         // PUT: api/Categorias/5
