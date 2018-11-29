@@ -30,6 +30,10 @@
 
             services.AddDbContext<DbContextSistema>(Options => Options.UseSqlServer(Configuration.GetConnectionString("Conexion")));
 
+            //aqui doy permiso para connexcion externas:
+            services.AddCors(Options => {
+                Options.AddPolicy("Todos", builder => builder.WithOrigins("*").WithHeaders("*").WithMethods("*"));
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -43,6 +47,9 @@
             {
                 app.UseHsts();
             }
+
+            //aqui autorizo la configuracion:
+            app.UseCors("Todos");
 
             app.UseHttpsRedirection();
             app.UseMvc();
